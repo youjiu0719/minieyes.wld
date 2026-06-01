@@ -2,181 +2,291 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>調理包看板</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>調理包前台</title>
 <style>
 :root{
   --br:#3D2B1F;--bm:#6B4226;--bl:#A0673A;
   --cream:#FDF6EE;--gold:#C8860A;
   --green:#2E7D32;--red:#C62828;--orange:#E65100;
-  --border:#E8DDD4;--bg:#F5EDE3;--muted:#7A6A5A;
+  --border:#E8DDD4;--bg:#F5EDE3;
+  --text:#1A1A1A;--muted:#7A6A5A;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}
-header{background:var(--br);color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:flex-end;}
-header h1{font-size:20px;font-weight:700;}
-.tagline{font-size:11px;opacity:.5;margin-top:3px;}
-.refresh-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;}
-.updated{font-size:11px;opacity:.45;margin-top:5px;text-align:right;}
-.container{max-width:520px;margin:0 auto;padding:16px;}
-.sec{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:18px 0 10px;}
-
-/* 未出貨提醒 */
-.alert-box{background:#FFF3E0;border:1px solid #FFB74D;border-radius:14px;overflow:hidden;margin-bottom:16px;}
-.alert-header{background:#FF6F00;color:#fff;padding:10px 16px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;}
-.alert-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 16px;border-bottom:1px solid #FFE0B2;}
-.alert-item:last-child{border-bottom:none;}
-.alert-name{font-size:13px;font-weight:600;color:#BF360C;}
-.alert-meta{font-size:11px;color:#E64A19;margin-top:2px;}
-.alert-custnote{font-size:11px;color:#1565C0;background:#E3F2FD;border-radius:5px;padding:4px 8px;margin-top:4px;}
-.alert-qty{font-size:20px;font-weight:700;color:#BF360C;font-variant-numeric:tabular-nums;white-space:nowrap;}
-.alert-qty small{font-size:11px;font-weight:400;}
-
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;min-height:100vh;padding-bottom:80px;}
+.topbar{background:var(--br);color:#fff;padding:14px 16px 0;position:sticky;top:0;z-index:20;}
+.topbar-row{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;}
+.topbar h1{font-size:16px;font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.clock{font-size:11px;opacity:.55;}
+.dash-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:20px;font-size:11px;cursor:pointer;white-space:nowrap;}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:0 0 auto;padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);font-size:12px;font-weight:500;cursor:pointer;background:none;white-space:nowrap;transition:all .2s;}
+.tab.active{background:#fff;color:var(--br);border-color:#fff;font-weight:600;}
+.page{display:none;padding:14px;max-width:480px;margin:0 auto;}
+.page.active{display:block;}
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--border);}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;margin-top:12px;}
+label:first-of-type{margin-top:0;}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:9px;font-size:14px;color:var(--text);background:#FAFAFA;outline:none;transition:border .15s;-webkit-appearance:none;appearance:none;}
+input:focus,textarea:focus{border-color:var(--bl);background:#fff;}
+textarea{resize:none;height:60px;}
+.seg{display:grid;gap:7px;}
+.seg.c2{grid-template-columns:1fr 1fr;}
+.seg.c3{grid-template-columns:1fr 1fr 1fr;}
+.seg.c4{grid-template-columns:repeat(4,1fr);}
+.seg.c5{grid-template-columns:repeat(5,1fr);}
+.seg-btn{padding:9px 4px;border:1px solid var(--border);border-radius:9px;background:#FAFAFA;font-size:12px;color:var(--muted);cursor:pointer;text-align:center;transition:all .15s;line-height:1.3;}
+.seg-btn small{display:block;font-size:10px;margin-top:2px;opacity:.7;}
+.seg-btn.active{background:var(--br);border-color:var(--br);color:#fff;}
+.seg-btn.active small{opacity:.7;}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.status-btn{padding:10px;border-radius:9px;border:1px solid var(--border);background:#FAFAFA;font-size:13px;cursor:pointer;text-align:center;color:var(--muted);transition:all .15s;}
+.status-btn.paid.active{background:#E8F5E9;border-color:var(--green);color:var(--green);font-weight:600;}
+.status-btn.unpaid.active{background:#FFEBEE;border-color:var(--red);color:var(--red);font-weight:600;}
+.summary{background:var(--cream);border-radius:10px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);margin-top:4px;}
+.summary .lbl{font-size:12px;color:var(--muted);}
+.summary .brk{font-size:11px;color:var(--muted);margin-top:2px;}
+.summary .amt{font-size:24px;font-weight:700;color:var(--br);font-variant-numeric:tabular-nums;}
+.btn-primary{width:100%;padding:14px;background:var(--br);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px;margin-top:10px;}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary:disabled{opacity:.35;cursor:default;}
+.customer-suggest{position:relative;}
+.suggest-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:9px;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,.08);max-height:160px;overflow-y:auto;display:none;}
+.suggest-item{padding:10px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #F5F0EB;}
+.suggest-item:last-child{border-bottom:none;}
+.suggest-item .addr{font-size:11px;color:var(--muted);margin-top:2px;}
+/* 待出貨 */
+.pending-card{background:#fff;border-radius:12px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+.pending-header{display:flex;justify-content:space-between;align-items:flex-start;padding:13px 14px 10px;}
+.pending-name{font-size:15px;font-weight:600;color:var(--br);}
+.pending-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+.pending-qty{font-size:24px;font-weight:700;color:var(--br);font-variant-numeric:tabular-nums;}
+.pending-qty small{font-size:12px;font-weight:400;}
+.pending-tags{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap;}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
+.tag-del{background:#EDE7F6;color:#5E35B1;}
+.tag-paid{background:#E8F5E9;color:var(--green);}
+.tag-unpaid{background:#FFEBEE;color:var(--red);}
+.pending-note{padding:0 14px 6px;font-size:12px;color:var(--muted);}
+.pending-custnote{padding:0 14px 10px;font-size:12px;color:#1565C0;background:#E3F2FD;margin:0 14px 10px;border-radius:7px;padding:8px 10px;}
+.pending-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin:0 14px 13px;}
+.ship-btn{padding:11px;background:var(--green);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;}
+.ship-btn:active{transform:scale(.98);}
+.cancel-btn{padding:11px 14px;background:#fff;color:var(--red);border:1px solid var(--red);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;}
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+.empty-state .icon{font-size:36px;margin-bottom:10px;}
 /* 庫存 */
-.inventory-hero{background:var(--br);color:#fff;border-radius:14px;padding:18px;margin-bottom:12px;}
-.inv-lbl{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.7px;}
-.inv-val{font-size:40px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;line-height:1;}
-.inv-sub{font-size:12px;opacity:.55;margin-top:6px;}
-.inv-note{font-size:12px;opacity:.75;margin-top:8px;background:rgba(255,255,255,.1);border-radius:7px;padding:7px 10px;}
-.inv-mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;}
-.inv-mini{background:rgba(255,255,255,.12);border-radius:9px;padding:10px;text-align:center;}
-.inv-mini .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
-.inv-mini .l{font-size:10px;opacity:.6;margin-top:2px;}
-.progress-wrap{margin-top:14px;}
-.progress-label{display:flex;justify-content:space-between;font-size:11px;opacity:.6;margin-bottom:6px;}
-.progress-track{background:rgba(255,255,255,.15);border-radius:6px;height:8px;overflow:hidden;}
-.progress-fill{height:100%;border-radius:6px;background:#fff;transition:width .6s ease;}
-
-/* KPI */
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.kpi{background:#fff;border-radius:12px;padding:14px;border:1px solid var(--border);}
-.kpi.full{grid-column:span 2;display:flex;justify-content:space-between;align-items:center;}
-.kpi-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
-.kpi-val{font-size:28px;font-weight:700;color:var(--br);margin-top:4px;font-variant-numeric:tabular-nums;line-height:1;}
-.kpi-sub{font-size:10px;color:var(--muted);margin-top:4px;}
-.kpi-val.gold{color:var(--gold);}
-.kpi-val.red{color:var(--red);}
-.kpi-val.green{color:var(--green);}
-
-/* 期間選擇 */
-.period-row{display:flex;gap:6px;margin-bottom:14px;}
-.period-btn{flex:1;padding:8px;border:1px solid var(--border);border-radius:9px;background:#fff;font-size:12px;color:var(--muted);cursor:pointer;text-align:center;transition:all .15s;}
-.period-btn.active{background:var(--br);border-color:var(--br);color:#fff;font-weight:600;}
-
-/* 毛利 */
-.profit-box{background:var(--br);color:#fff;border-radius:14px;padding:18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
-.p-lbl{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.6px;}
-.p-val{font-size:30px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;}
-.p-detail{font-size:11px;opacity:.5;margin-top:4px;}
-
-/* 卡片 */
-.card{background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px;}
-.card-header{padding:11px 16px;background:var(--cream);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--bm);}
-.card-header span{font-weight:400;color:var(--muted);font-size:12px;}
-
-.order-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 16px;border-bottom:1px solid #F5F0EB;}
-.order-row:last-child{border-bottom:none;}
-.order-row.cancelled{opacity:.4;}
-.oname{font-size:13px;font-weight:600;color:var(--br);}
-.ometa{font-size:11px;color:var(--muted);margin-top:2px;}
-.ocustnote{font-size:11px;color:#1565C0;margin-top:3px;}
-.oamt{font-size:14px;font-weight:700;color:var(--br);font-variant-numeric:tabular-nums;text-align:right;}
-.pill{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;margin-top:3px;}
+.batch-hero{background:var(--br);color:#fff;border-radius:14px;padding:18px;margin-bottom:12px;}
+.bh-lbl{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.7px;}
+.bh-val{font-size:38px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;}
+.bh-sub{font-size:12px;opacity:.6;margin-top:4px;}
+.bh-note{font-size:12px;opacity:.75;margin-top:6px;background:rgba(255,255,255,.1);border-radius:7px;padding:7px 10px;}
+.batch-mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;}
+.batch-mini{background:rgba(255,255,255,.12);border-radius:9px;padding:10px;text-align:center;}
+.bmv{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
+.bml{font-size:10px;opacity:.6;margin-top:2px;}
+/* 記錄 */
+.period-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.period-tab{flex:1;padding:8px;border:1px solid var(--border);border-radius:9px;background:#fff;font-size:12px;color:var(--muted);cursor:pointer;text-align:center;transition:all .15s;}
+.period-tab.active{background:var(--br);border-color:var(--br);color:#fff;font-weight:600;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.stat-card{background:#fff;border-radius:12px;padding:13px;border:1px solid var(--border);}
+.s-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
+.s-val{font-size:22px;font-weight:700;color:var(--br);margin-top:3px;font-variant-numeric:tabular-nums;}
+.s-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.profit-card{background:var(--br);color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+.profit-card .p-lbl{font-size:11px;opacity:.6;}
+.profit-card .p-val{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px;}
+.profit-card .p-sub{font-size:11px;opacity:.5;margin-top:2px;}
+.rec-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;border-bottom:1px solid #F5F0EB;}
+.rec-item:last-child{border-bottom:none;}
+.rec-item.cancelled{opacity:.45;}
+.rname{font-size:13px;font-weight:600;color:var(--br);}
+.rmeta{font-size:11px;color:var(--muted);margin-top:2px;}
+.ramt{font-size:14px;font-weight:700;color:var(--br);font-variant-numeric:tabular-nums;text-align:right;}
+.pill{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;}
 .pill-paid{background:#E8F5E9;color:var(--green);}
 .pill-unpaid{background:#FFEBEE;color:var(--red);}
 .pill-shipped{background:#E3F2FD;color:#1565C0;}
 .pill-unshipped{background:#FFF3E0;color:var(--orange);}
-.pill-cancelled{background:#EEE;color:#757575;}
-
-.exp-row{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #F5F0EB;}
-.exp-row:last-child{border-bottom:none;}
-.exp-cat{font-size:13px;color:var(--br);}
-.exp-note{font-size:11px;color:var(--muted);margin-top:2px;}
-.exp-amt{font-size:14px;font-weight:600;color:var(--red);font-variant-numeric:tabular-nums;}
-
-.bar-wrap{padding:12px 16px 4px;}
-.bar-item{margin-bottom:11px;}
-.bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px;}
-.bar-track{background:#F0E8E0;border-radius:6px;height:7px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:6px;transition:width .6s ease;}
-
+.pill-cancelled{background:#EEEEEE;color:#757575;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--br);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:99;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.err{background:var(--red);}
 .loading{text-align:center;padding:30px;color:var(--muted);font-size:13px;}
-.empty{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
-footer{text-align:center;padding:20px;font-size:11px;color:#C0B0A0;}
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>🧊 調理包看板</h1>
-    <div class="tagline">即時統計・公開查看</div>
-  </div>
-  <div>
-    <button class="refresh-btn" onclick="loadAll()">重新整理</button>
-    <div class="updated" id="updatedTime">--</div>
-  </div>
-</header>
-
-<div class="container">
-  <div id="alertArea"></div>
-
-  <div class="sec">庫存狀況</div>
-  <div class="inventory-hero">
-    <div class="inv-lbl">當前批次剩餘</div>
-    <div class="inv-val" id="invRemain">-</div>
-    <div class="inv-sub" id="invSub">載入中...</div>
-    <div class="inv-note" id="invNote" style="display:none"></div>
-    <div class="inv-mini-grid">
-      <div class="inv-mini"><div class="v" id="invTotal">-</div><div class="l">本批生產</div></div>
-      <div class="inv-mini"><div class="v" id="invSold">-</div><div class="l">已售出</div></div>
-      <div class="inv-mini"><div class="v" id="invPct">-</div><div class="l">售出率</div></div>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-label"><span>售出進度</span><span id="invPctLabel">0%</span></div>
-      <div class="progress-track"><div class="progress-fill" id="invBar" style="width:0%"></div></div>
+<div class="topbar">
+  <div class="topbar-row">
+    <h1>🧊 調理包前台</h1>
+    <div class="topbar-right">
+      <span class="clock" id="clock"></span>
+      <button class="dash-btn" onclick="window.open(DASHBOARD_URL,'_blank')">📊 看板</button>
     </div>
   </div>
-
-  <div class="sec">營業統計</div>
-  <div class="period-row">
-    <button class="period-btn active" onclick="setPeriod('week',this)">本週</button>
-    <button class="period-btn" onclick="setPeriod('month',this)">本月</button>
-    <button class="period-btn" onclick="setPeriod('batch',this)">本批</button>
-    <button class="period-btn" onclick="setPeriod('all',this)">全部</button>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('order',this)">訂單</button>
+    <button class="tab" onclick="switchTab('pending',this)">待出貨</button>
+    <button class="tab" onclick="switchTab('expense',this)">雜支</button>
+    <button class="tab" onclick="switchTab('inventory',this)">庫存</button>
+    <button class="tab" onclick="switchTab('records',this)">記錄</button>
   </div>
-  <div class="kpi-grid" id="kpiGrid"><div class="loading" style="grid-column:span 2">載入中...</div></div>
-  <div id="profitBox"></div>
-
-  <div class="sec">配送方式</div>
-  <div class="card">
-    <div class="bar-wrap" id="deliveryChart"><div class="loading">載入中...</div></div>
-  </div>
-
-  <div class="sec">訂單明細</div>
-  <div class="card">
-    <div class="card-header">訂單列表 <span id="orderLabel"></span></div>
-    <div id="orderList"><div class="loading">載入中...</div></div>
-  </div>
-
-  <div class="sec">雜支記錄</div>
-  <div class="card">
-    <div class="card-header">支出明細 <span id="expLabel"></span></div>
-    <div id="expList"><div class="loading">載入中...</div></div>
-  </div>
-
-  <footer>每60秒自動更新</footer>
 </div>
 
+<!-- 訂單 -->
+<div class="page active" id="page-order">
+  <div class="card" id="parseCard">
+    <div class="card-title">快速貼上解析</div>
+    <textarea id="parseInput" placeholder="貼上客戶資訊文字" style="height:110px;font-size:13px;"></textarea>
+    <button onclick="parseCustomerText()" id="parseBtn" style="width:100%;margin-top:8px;padding:10px;background:var(--bm);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">🔍 解析</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">客戶</div>
+    <label>客戶名稱</label>
+    <div class="customer-suggest">
+      <input type="text" id="customer" placeholder="輸入名稱（自動帶入資料）" autocomplete="off" oninput="searchCustomer()" onblur="setTimeout(closeSuggest,200)">
+      <div class="suggest-list" id="suggestList"></div>
+    </div>
+    <label>電話</label>
+    <input type="text" id="phone" placeholder="手機號碼" inputmode="tel">
+    <label>地址／客戶備註</label>
+    <input type="text" id="custNote" placeholder="配送地址或給客戶的備註">
+    <label>包數</label>
+    <input type="number" id="quantity" placeholder="0" min="1" oninput="calcTotal()">
+    <label>銷售日期</label>
+    <input type="date" id="saleDate">
+  </div>
+  <div class="card">
+    <div class="card-title">配送</div>
+    <div class="seg c3">
+      <button class="seg-btn active" data-g="delivery" data-v="賣貨便" onclick="selSeg(this)">賣貨便<small>冷凍</small></button>
+      <button class="seg-btn" data-g="delivery" data-v="宅配" onclick="selSeg(this)">宅配<small>冷凍</small></button>
+      <button class="seg-btn" data-g="delivery" data-v="面交" onclick="selSeg(this)">面交<small>免運</small></button>
+    </div>
+    <label>箱型</label>
+    <div class="seg c2" id="boxSeg">
+      <button class="seg-btn active" data-g="box" data-v="小箱" onclick="selSeg(this);setShip(120)">小箱<small>建議 $120</small></button>
+      <button class="seg-btn" data-g="box" data-v="大箱" onclick="selSeg(this);setShip(225)">大箱<small>建議 $225</small></button>
+    </div>
+    <label>運費（可修改）</label>
+    <input type="number" id="shippingInput" value="120" min="0" oninput="onShippingInput()" style="font-size:16px;font-weight:600;">
+  </div>
+  <div class="card">
+    <div class="card-title">付款 & 經手</div>
+    <label>付款方式</label>
+    <div class="seg c4">
+      <button class="seg-btn active" data-g="payment" data-v="轉帳" onclick="selSeg(this);setPR(false)">轉帳</button>
+      <button class="seg-btn" data-g="payment" data-v="現金" onclick="selSeg(this);setPR(false)">現金</button>
+      <button class="seg-btn" data-g="payment" data-v="街口" onclick="selSeg(this);setPR(false)">街口</button>
+      <button class="seg-btn" data-g="payment" data-v="公關" onclick="selSeg(this);setPR(true)">公關<small>$0</small></button>
+    </div>
+    <label>付款狀態</label>
+    <div class="status-grid">
+      <button class="status-btn paid active" onclick="setPayStatus('已付')">✓ 已付款</button>
+      <button class="status-btn unpaid" onclick="setPayStatus('未付')">✗ 未付款</button>
+    </div>
+    <label>經手人</label>
+    <div class="seg c5">
+      <button class="seg-btn active" data-g="operator" data-v="爸比" onclick="selSeg(this)">爸比</button>
+      <button class="seg-btn" data-g="operator" data-v="Ni" onclick="selSeg(this)">Ni</button>
+      <button class="seg-btn" data-g="operator" data-v="阿嵐" onclick="selSeg(this)">阿嵐</button>
+      <button class="seg-btn" data-g="operator" data-v="濬" onclick="selSeg(this)">濬</button>
+      <button class="seg-btn" data-g="operator" data-v="Mama" onclick="selSeg(this)">Mama</button>
+    </div>
+    <label>內部備註</label>
+    <textarea id="note" placeholder="內部用，客人看不到..."></textarea>
+  </div>
+  <div class="summary">
+    <div><div class="lbl">本筆合計</div><div class="brk" id="breakdown">0包 × $120 + 運費 $120</div></div>
+    <div class="amt" id="totalAmt">$0</div>
+  </div>
+  <button class="btn-primary" id="orderBtn" onclick="submitOrder()">確認送出</button>
+</div>
+
+<!-- 待出貨 -->
+<div class="page" id="page-pending">
+  <div id="pendingList"><div class="loading">載入中...</div></div>
+</div>
+
+<!-- 雜支 -->
+<div class="page" id="page-expense">
+  <div class="card">
+    <div class="card-title">雜支登記</div>
+    <label>類別</label>
+    <div class="seg c3">
+      <button class="seg-btn active" data-g="expcat" data-v="材料費" onclick="selSeg(this)">材料費</button>
+      <button class="seg-btn" data-g="expcat" data-v="包材費" onclick="selSeg(this)">包材費</button>
+      <button class="seg-btn" data-g="expcat" data-v="其他" onclick="selSeg(this)">其他</button>
+    </div>
+    <label>金額</label>
+    <input type="number" id="expAmt" placeholder="0" min="0">
+    <label>說明</label>
+    <textarea id="expNote" placeholder="這筆費用說明..."></textarea>
+    <label>經手人</label>
+    <div class="seg c5">
+      <button class="seg-btn active" data-g="expop" data-v="爸比" onclick="selSeg(this)">爸比</button>
+      <button class="seg-btn" data-g="expop" data-v="Ni" onclick="selSeg(this)">Ni</button>
+      <button class="seg-btn" data-g="expop" data-v="阿嵐" onclick="selSeg(this)">阿嵐</button>
+      <button class="seg-btn" data-g="expop" data-v="濬" onclick="selSeg(this)">濬</button>
+      <button class="seg-btn" data-g="expop" data-v="Mama" onclick="selSeg(this)">Mama</button>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="submitExpense()">登記雜支</button>
+</div>
+
+<!-- 庫存 -->
+<div class="page" id="page-inventory">
+  <div class="batch-hero">
+    <div class="bh-lbl">當前批次剩餘</div>
+    <div class="bh-val" id="batchRemain">-</div>
+    <div class="bh-sub" id="batchSub">載入中...</div>
+    <div class="bh-note" id="batchNote" style="display:none"></div>
+    <div class="batch-mini-grid">
+      <div class="batch-mini"><div class="bmv" id="batchTotal">-</div><div class="bml">本批生產</div></div>
+      <div class="batch-mini"><div class="bmv" id="batchSold">-</div><div class="bml">已售出</div></div>
+      <div class="batch-mini"><div class="bmv" id="batchPct">-</div><div class="bml">售出率</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">登記新批次</div>
+    <label>生產包數</label>
+    <input type="number" id="newBatchQty" placeholder="這批做了幾包" min="1">
+    <label>批次備註</label>
+    <textarea id="newBatchNote" placeholder="批次說明，例如：2026-04 第一批、新配方..."></textarea>
+  </div>
+  <button class="btn-primary" onclick="submitBatch()">登記新批次</button>
+</div>
+
+<!-- 記錄 -->
+<div class="page" id="page-records">
+  <div class="period-tabs">
+    <button class="period-tab active" onclick="setPeriod('week',this)">本週</button>
+    <button class="period-tab" onclick="setPeriod('month',this)">本月</button>
+    <button class="period-tab" onclick="setPeriod('batch',this)">本批</button>
+    <button class="period-tab" onclick="setPeriod('all',this)">全部</button>
+  </div>
+  <div id="profitCard"></div>
+  <div class="stat-grid" id="recStats"></div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:12px 14px;background:var(--cream);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);">訂單明細</div>
+    <div id="recList"><div class="loading">載入中...</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
+const DASHBOARD_URL='https://minieyes-wld-dashboard.netlify.app/';
 const API='https://script.google.com/macros/s/AKfycbxn-6LW1odeSgsbgS6NbbMAfDUNu2K61-th73EfWXV-GaSjdmuzhtmNfmo6_bgcILmk/exec';
-let allOrders=[],allExpenses=[],allBatches=[],curPeriod='week';
+let shipping=120,payStatus='已付',customers=[],allOrders=[],allBatches=[],allExpenses=[],curPeriod='week';
 
-// 新欄位順序:
-// 0:銷售日期 1:記帳時間 2:客戶名稱 3:電話 4:包數 5:金額 6:運費
-// 7:配送方式 8:箱型 9:付款方式 10:付款狀態 11:出貨狀態 12:經手人
-// 13:內部備註 14:客戶備註 15:訂單狀態
-
+// 解析中文日期
 function parseDate(str){
   if(!str)return null;
   try{
@@ -198,6 +308,7 @@ function parseDate(str){
   }catch(e){return null;}
 }
 
+
 async function apiFetch(params, retry=1){
   for(let i=0;i<=retry;i++){
     try{
@@ -213,182 +324,390 @@ async function apiFetch(params, retry=1){
 }
 
 
-async function loadAll(){
-  document.getElementById('updatedTime').textContent='載入中...';
-  try{
-    const d=await apiFetch({action:'dashboard'});
-    allOrders=d.orders||[];
-    allExpenses=d.expenses||[];
-    allBatches=d.batches||[];
-    renderInventory();
-    renderAlert();
-    renderStats();
-    renderOrders();
-    renderExpenses();
-    document.getElementById('updatedTime').textContent='更新：'+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-  }catch(e){document.getElementById('updatedTime').textContent='載入失敗';}
+// Clock
+setInterval(()=>{
+  const d=new Date();
+  document.getElementById('clock').textContent=
+    d.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})+' '+
+    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+},1000);
+
+// Set default sale date to today
+function setDefaultDate(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('saleDate').value=today;
 }
 
-function renderInventory(){
-  if(!allBatches.length){
-    document.getElementById('invRemain').textContent='尚無批次';
-    document.getElementById('invSub').textContent='請先登記第一批';
-    return;
+function switchTab(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='pending')loadPending();
+  if(name==='inventory')loadInventory();
+  if(name==='records')loadRecords();
+}
+
+function selSeg(btn){
+  const g=btn.dataset.g;
+  document.querySelectorAll(`[data-g="${g}"]`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(g==='delivery'){
+    const face=btn.dataset.v==='面交';
+    const boxSeg=document.getElementById('boxSeg');
+    boxSeg.style.opacity=face?.4:1;
+    boxSeg.style.pointerEvents=face?'none':'auto';
+    if(face){shipping=0;}else{const b=document.querySelector('[data-g="box"].active');shipping=b?.dataset.v==='大箱'?225:120;}
+    calcTotal();
   }
-  const last=allBatches[allBatches.length-1];
-  const bDate=parseDate(last[0]);
-  const bQty=parseInt(last[1])||0;
-  const bNote=last[2]||'';
-  const sold=allOrders.filter(r=>r[0]&&r[15]!=='已取消'&&parseDate(r[0])>=bDate).reduce((a,r)=>a+(parseInt(r[4])||0),0);
-  const remain=bQty-sold;
-  const pct=bQty?Math.round(sold/bQty*100):0;
-  document.getElementById('invRemain').textContent=remain+'包';
-  document.getElementById('invSub').textContent=`批次：${bDate?bDate.toLocaleDateString('zh-TW'):''}${remain<=10?' ⚠️ 快賣完了！':''}`;
-  const noteEl=document.getElementById('invNote');
-  if(bNote){noteEl.textContent='📝 '+bNote;noteEl.style.display='block';}
-  else{noteEl.style.display='none';}
-  document.getElementById('invTotal').textContent=bQty;
-  document.getElementById('invSold').textContent=sold;
-  document.getElementById('invPct').textContent=pct+'%';
-  document.getElementById('invPctLabel').textContent=pct+'%';
-  document.getElementById('invBar').style.width=pct+'%';
+}
+function setShip(v){
+  shipping=v;
+  const el=document.getElementById('shippingInput');
+  if(el)el.value=v;
+  calcTotal();
+}
+function onShippingInput(){
+  const v=parseInt(document.getElementById('shippingInput').value)||0;
+  shipping=v;
+  calcTotal();
+}
+function setPayStatus(s){
+  payStatus=s;
+  document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.status-btn.'+(s==='已付'?'paid':'unpaid')).classList.add('active');
+}
+function setPR(isPR){
+  const boxSeg=document.getElementById('boxSeg');
+  const shEl=document.getElementById('shippingInput');
+  if(isPR){
+    document.querySelectorAll('[data-g="delivery"]').forEach(b=>b.classList.remove('active'));
+    document.querySelector('[data-g="delivery"][data-v="面交"]').classList.add('active');
+    boxSeg.style.opacity='.4';boxSeg.style.pointerEvents='none';
+    shipping=0;if(shEl)shEl.value=0;
+  }else{
+    boxSeg.style.opacity='1';boxSeg.style.pointerEvents='auto';
+    const box=document.querySelector('[data-g="box"].active');
+    shipping=box?.dataset.v==='大箱'?225:120;
+    if(shEl)shEl.value=shipping;
+  }
+  calcTotal();
+}
+function getVal(g){return document.querySelector(`[data-g="${g}"].active`)?.dataset.v||'';}
+
+function calcTotal(){
+  const qty=parseInt(document.getElementById('quantity').value)||0;
+  const isPR=getVal('payment')==='公關';
+  const total=isPR?0:qty*120+shipping;
+  const del=getVal('delivery');
+  document.getElementById('breakdown').textContent=isPR?'公關 $0':`${qty}包 × $120 + ${del==='面交'?'面交免運':'運費 $'+shipping}`;
+  document.getElementById('totalAmt').textContent='$'+total.toLocaleString();
 }
 
-function renderAlert(){
-  const pending=allOrders.filter(r=>r[11]==='未出貨'&&r[10]==='已付'&&r[15]!=='已取消');
-  if(!pending.length){document.getElementById('alertArea').innerHTML='';return;}
-  document.getElementById('alertArea').innerHTML=`
-    <div class="alert-box">
-      <div class="alert-header">⚠️ 待出貨（已付款） <span>${pending.length} 筆</span></div>
-      ${pending.map(r=>{
-        const custnote=r[14]||'';
-        return `<div class="alert-item">
+async function loadCustomers(){
+  try{
+    const rows=await apiFetch({action:'customers'});
+    customers=rows.slice(1).map(r=>({name:r[0],phone:r[1]||'',addr:r[2]||'',note:r[3]||''}));
+  }catch(e){}
+}
+function searchCustomer(){
+  const q=document.getElementById('customer').value.trim().toLowerCase();
+  const list=document.getElementById('suggestList');
+  if(!q){list.style.display='none';return;}
+  const matches=customers.filter(c=>c.name.toLowerCase().includes(q)).slice(0,5);
+  if(!matches.length){list.style.display='none';return;}
+  list.innerHTML=matches.map(c=>`<div class="suggest-item" onmousedown="fillCustomer('${c.name.replace(/'/g,"\\'")}','${c.phone.replace(/'/g,"\\'")}','${c.addr.replace(/'/g,"\\'")}')"><div>${c.name}</div>${c.phone?`<div class="addr">📞 ${c.phone}</div>`:''}${c.addr?`<div class="addr">${c.addr}</div>`:''}</div>`).join('');
+  list.style.display='block';
+}
+function fillCustomer(name,phone,addr){
+  document.getElementById('customer').value=name;
+  document.getElementById('phone').value=phone||'';
+  document.getElementById('custNote').value=addr||'';
+  document.getElementById('suggestList').style.display='none';
+}
+function closeSuggest(){document.getElementById('suggestList').style.display='none';}
+
+async function submitOrder(){
+  const customer=document.getElementById('customer').value.trim();
+  const qty=parseInt(document.getElementById('quantity').value)||0;
+  if(!customer){showToast('請填寫客戶名稱',true);return;}
+  if(!qty){showToast('請填寫包數',true);return;}
+  const btn=document.getElementById('orderBtn');
+  btn.disabled=true;btn.textContent='送出中...';
+  const del=getVal('delivery');
+  const isPR=getVal('payment')==='公關';
+  try{
+    await apiFetch({
+      action:'addOrder',customer,quantity:qty,
+      phone:document.getElementById('phone').value.trim(),
+      saleDate:document.getElementById('saleDate').value,
+      shipping:isPR?0:(del==='面交'?0:(parseInt(document.getElementById('shippingInput').value)||0)),
+      delivery:del,box:del==='面交'?'面交':getVal('box'),
+      payment:getVal('payment'),status:payStatus,
+      operator:getVal('operator'),
+      note:document.getElementById('note').value.trim(),
+      custnote:document.getElementById('custNote').value.trim()
+    });
+    showToast(`✓ 已記錄：${customer} ${qty}包`);
+    ['customer','phone','custNote','quantity','note'].forEach(id=>document.getElementById(id).value='');
+    setDefaultDate();
+    calcTotal();loadCustomers();
+  }catch(e){showToast('送出失敗',true);}
+  btn.disabled=false;btn.textContent='確認送出';
+}
+
+async function submitExpense(){
+  const amt=parseFloat(document.getElementById('expAmt').value)||0;
+  if(!amt){showToast('請填寫金額',true);return;}
+  try{
+    await apiFetch({action:'addExpense',category:getVal('expcat'),amount:amt,note:document.getElementById('expNote').value,operator:getVal('expop')});
+    showToast('✓ 雜支已登記');
+    document.getElementById('expAmt').value='';
+    document.getElementById('expNote').value='';
+  }catch(e){showToast('送出失敗',true);}
+}
+
+async function loadPending(){
+  document.getElementById('pendingList').innerHTML='<div class="loading">載入中...</div>';
+  try{
+    const items=await apiFetch({action:'pending'});
+    if(!items.length){
+      document.getElementById('pendingList').innerHTML='<div class="empty-state"><div class="icon">✅</div><p>目前沒有待出貨訂單</p></div>';
+      return;
+    }
+    document.getElementById('pendingList').innerHTML=items.map(item=>{
+      const r=item.data,idx=item.row;
+      // 新欄位: 0:銷售日期 1:記帳時間 2:客戶 3:電話 4:包數 5:金額 6:運費 7:配送 8:箱型 9:付款方式 10:付款狀態 11:出貨狀態 12:經手人 13:內部備註 14:客戶備註
+      const saleDate=r[0]||'';
+      const custnote=r[14]||'';
+      const internote=r[13]||'';
+      return `<div class="pending-card">
+        <div class="pending-header">
           <div>
-            <div class="alert-name">${r[2]}</div>
-            <div class="alert-meta">${r[7]}・${r[0]}・${r[12]}</div>
-            ${custnote?`<div class="alert-custnote">💬 ${custnote}</div>`:''}
+            <div class="pending-name">${r[2]}</div>
+            <div class="pending-meta">${r[3]?r[3]+' · ':''}${saleDate}・${r[12]}</div>
           </div>
-          <div class="alert-qty">${r[4]}<small> 包</small></div>
-        </div>`;
-      }).join('')}
-    </div>`;
+          <div class="pending-qty">${r[4]}<small> 包</small></div>
+        </div>
+        <div class="pending-tags">
+          <span class="tag tag-del">${r[7]}</span>
+          <span class="tag ${r[10]==='已付'?'tag-paid':'tag-unpaid'}">${r[10]}</span>
+          ${r[8]!=='面交'?`<span class="tag" style="background:#FFF8E1;color:#F57F17;">${r[8]}</span>`:''}
+          <span class="tag" style="background:#F3E5F5;color:#6A1B9A;">${r[9]}</span>
+        </div>
+        ${custnote?`<div class="pending-custnote">💬 ${custnote}</div>`:''}
+        ${internote?`<div class="pending-note">📝 ${internote}</div>`:''}
+        <div class="pending-actions">
+          <button class="ship-btn" onclick="confirmShip(${idx},this)">✓ 確認出貨</button>
+          <button class="cancel-btn" onclick="confirmCancel(${idx},this)">取消</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){document.getElementById('pendingList').innerHTML='<div class="loading">載入失敗</div>';}
+}
+
+async function confirmShip(rowIndex,btn){
+  btn.disabled=true;btn.textContent='處理中...';
+  try{
+    await apiFetch({action:'ship',rowIndex});
+    btn.closest('.pending-card').style.opacity='.4';
+    btn.textContent='✓ 已出貨';
+    setTimeout(loadPending,800);
+  }catch(e){btn.disabled=false;btn.textContent='✓ 確認出貨';showToast('失敗，請重試',true);}
+}
+
+async function confirmCancel(rowIndex,btn){
+  if(!confirm('確定要取消這筆訂單嗎？'))return;
+  btn.disabled=true;btn.textContent='處理中...';
+  try{
+    await apiFetch({action:'cancel',rowIndex});
+    btn.closest('.pending-card').style.opacity='.4';
+    showToast('已取消訂單');
+    setTimeout(loadPending,800);
+  }catch(e){btn.disabled=false;btn.textContent='取消';showToast('失敗，請重試',true);}
+}
+
+async function loadInventory(){
+  try{
+    const [oRes,bRes]=await Promise.all([apiFetch({action:'orders'}),apiFetch({action:'batches'})]);
+    allOrders=oRes.slice(1);
+    allBatches=bRes.slice(1);
+    if(!allBatches.length){
+      document.getElementById('batchRemain').textContent='尚無批次';
+      document.getElementById('batchSub').textContent='請先登記第一批';
+      ['batchTotal','batchSold','batchPct'].forEach(id=>document.getElementById(id).textContent='-');
+      return;
+    }
+    const last=allBatches[allBatches.length-1];
+    const bDate=parseDate(last[0]);
+    const bQty=parseInt(last[1])||0;
+    const bNoteTxt=last[2]||'';
+    const sold=allOrders.filter(r=>r[0]&&r[15]!=='已取消'&&parseDate(r[0])>=bDate).reduce((a,r)=>a+(parseInt(r[4])||0),0);
+    const remain=bQty-sold;
+    const pct=bQty?Math.round(sold/bQty*100):0;
+    document.getElementById('batchRemain').textContent=remain+'包';
+    document.getElementById('batchSub').textContent=`批次：${bDate?bDate.toLocaleDateString('zh-TW'):''}${remain<=10?' ⚠️ 快賣完了！':''}`;
+    const noteEl=document.getElementById('batchNote');
+    if(bNoteTxt){noteEl.textContent='📝 '+bNoteTxt;noteEl.style.display='block';}
+    else{noteEl.style.display='none';}
+    document.getElementById('batchTotal').textContent=bQty;
+    document.getElementById('batchSold').textContent=sold;
+    document.getElementById('batchPct').textContent=pct+'%';
+  }catch(e){}
+}
+
+async function submitBatch(){
+  const qty=parseInt(document.getElementById('newBatchQty').value)||0;
+  if(!qty){showToast('請填寫包數',true);return;}
+  try{
+    await apiFetch({action:'addBatch',quantity:qty,note:document.getElementById('newBatchNote').value});
+    showToast(`✓ 新批次 ${qty} 包已登記`);
+    document.getElementById('newBatchQty').value='';
+    document.getElementById('newBatchNote').value='';
+    loadInventory();
+  }catch(e){showToast('送出失敗',true);}
 }
 
 function setPeriod(p,btn){
   curPeriod=p;
-  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.period-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderStats();renderOrders();
+  renderRecords();
 }
 
-function getFiltered(){
+async function loadRecords(){
+  try{
+    const [oRes,bRes,eRes]=await Promise.all([apiFetch({action:'orders'}),apiFetch({action:'batches'}),apiFetch({action:'expenses'})]);
+    allOrders=oRes.slice(1);
+    allBatches=bRes.slice(1);
+    allExpenses=eRes.slice(1);
+    renderRecords();
+  }catch(e){}
+}
+
+function renderRecords(){
   const now=new Date();
   const weekStart=new Date(now);weekStart.setDate(now.getDate()-now.getDay()+1);weekStart.setHours(0,0,0,0);
   const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
   const batchStart=allBatches.length?parseDate(allBatches[allBatches.length-1][0]):new Date(0);
-  return allOrders.filter(r=>{
+
+  const filtered=allOrders.filter(r=>{
     if(!r[0])return false;
-    const d=parseDate(r[0]);
+    const d=parseDate(r[0]); // 銷售日期
     if(!d)return curPeriod==='all';
     if(curPeriod==='week')return d>=weekStart;
     if(curPeriod==='month')return d>=monthStart;
     if(curPeriod==='batch')return d>=batchStart;
     return true;
   });
-}
 
-function renderStats(){
-  const f=getFiltered();
-  const active=f.filter(r=>r[15]!=='已取消');
+  const active=filtered.filter(r=>r[15]!=='已取消');
   const qty=active.reduce((a,r)=>a+(parseInt(r[4])||0),0);
   const sales=active.reduce((a,r)=>a+(parseInt(r[5])||0),0);
   const ship=active.reduce((a,r)=>a+(parseInt(r[6])||0),0);
   const unpaid=active.filter(r=>r[10]==='未付').length;
-  const unpaidAmt=active.filter(r=>r[10]==='未付').reduce((a,r)=>a+(parseInt(r[5])||0)+(parseInt(r[6])||0),0);
   const unshipped=active.filter(r=>r[11]==='未出貨').length;
-  const cancelled=f.filter(r=>r[15]==='已取消').length;
+  const cancelled=filtered.filter(r=>r[15]==='已取消').length;
   const totalExp=allExpenses.reduce((a,r)=>a+(parseFloat(r[2])||0),0);
   const profit=sales-totalExp;
 
-  document.getElementById('kpiGrid').innerHTML=`
-    <div class="kpi"><div class="kpi-lbl">總包數</div><div class="kpi-val">${qty}</div></div>
-    <div class="kpi"><div class="kpi-lbl">訂單筆數</div><div class="kpi-val">${active.length}</div></div>
-    <div class="kpi"><div class="kpi-lbl">銷售金額</div><div class="kpi-val gold">$${sales.toLocaleString()}</div><div class="kpi-sub">不含運費</div></div>
-    <div class="kpi"><div class="kpi-lbl">運費收入</div><div class="kpi-val">$${ship.toLocaleString()}</div></div>
-    <div class="kpi full">
-      <div><div class="kpi-lbl">未付款</div><div class="kpi-val red">${unpaid} 筆</div></div>
-      <div style="text-align:right"><div class="kpi-lbl">未付金額</div><div class="kpi-val red">$${unpaidAmt.toLocaleString()}</div></div>
-    </div>
-    <div class="kpi"><div class="kpi-lbl">未出貨</div><div class="kpi-val" style="color:var(--orange)">${unshipped} 筆</div></div>
-    <div class="kpi"><div class="kpi-lbl">取消筆數</div><div class="kpi-val" style="color:var(--muted)">${cancelled}</div></div>`;
-
-  const expCats={};
-  allExpenses.forEach(r=>{expCats[r[1]]=(expCats[r[1]]||0)+(parseFloat(r[2])||0);});
-  document.getElementById('profitBox').innerHTML=`
-    <div class="profit-box">
+  document.getElementById('profitCard').innerHTML=`
+    <div class="profit-card">
       <div>
         <div class="p-lbl">毛利（銷售 − 雜支）</div>
         <div class="p-val">${profit>=0?'':'−'}$${Math.abs(profit).toLocaleString()}</div>
-        <div class="p-detail">雜支合計 $${totalExp.toLocaleString()}</div>
+        <div class="p-sub">雜支 $${totalExp.toLocaleString()}</div>
       </div>
       <div style="text-align:right">
-        ${Object.entries(expCats).map(([k,v])=>`<div style="font-size:11px;opacity:.65;margin-top:3px;">${k} $${v.toLocaleString()}</div>`).join('')||'<div style="font-size:11px;opacity:.4">尚無雜支</div>'}
+        <div class="p-lbl">總收入</div>
+        <div style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px;">$${(sales+ship).toLocaleString()}</div>
       </div>
     </div>`;
 
-  const del={};
-  getFiltered().filter(r=>r[15]!=='已取消').forEach(r=>{del[r[7]]=(del[r[7]]||0)+1;});
-  const maxDel=Math.max(...Object.values(del),1);
-  const colors={'賣貨便':'#A0673A','宅配':'#6B4226','面交':'#C8860A'};
-  document.getElementById('deliveryChart').innerHTML=Object.keys(del).length
-    ?Object.entries(del).map(([k,v])=>`
-      <div class="bar-item">
-        <div class="bar-label"><span>${k}</span><span>${v} 筆</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxDel*100)}%;background:${colors[k]||'#888'}"></div></div>
-      </div>`).join('')
-    :'<div class="empty">此期間無資料</div>';
-}
+  document.getElementById('recStats').innerHTML=`
+    <div class="stat-card"><div class="s-lbl">包數</div><div class="s-val">${qty}</div></div>
+    <div class="stat-card"><div class="s-lbl">筆數</div><div class="s-val">${active.length}</div></div>
+    <div class="stat-card"><div class="s-lbl">銷售額</div><div class="s-val">$${sales.toLocaleString()}</div><div class="s-sub">不含運費</div></div>
+    <div class="stat-card"><div class="s-lbl">運費</div><div class="s-val">$${ship.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="s-lbl">未付款</div><div class="s-val" style="color:var(--red)">${unpaid}</div><div class="s-sub">筆</div></div>
+    <div class="stat-card"><div class="s-lbl">取消</div><div class="s-val" style="color:var(--muted)">${cancelled}</div><div class="s-sub">筆</div></div>`;
 
-function renderOrders(){
-  const f=getFiltered();
-  document.getElementById('orderLabel').textContent=f.length+' 筆';
-  document.getElementById('orderList').innerHTML=f.length
-    ?[...f].reverse().map(r=>{
+  document.getElementById('recList').innerHTML=filtered.length
+    ?[...filtered].reverse().map(r=>{
       const isCancelled=r[15]==='已取消';
       const total=(parseInt(r[5])||0)+(parseInt(r[6])||0);
-      const custnote=r[14]||'';
-      return `<div class="order-row${isCancelled?' cancelled':''}">
+      const t=r[0]||'';
+      return `<div class="rec-item${isCancelled?' cancelled':''}">
         <div>
-          <div class="oname">${r[2]}</div>
-          <div class="ometa">${r[4]}包・${r[7]}・${r[12]} ${r[0]||''}</div>
-          ${custnote?`<div class="ocustnote">💬 ${custnote}</div>`:''}
+          <div class="rname">${r[2]}${isCancelled?' <span style="font-size:10px;color:var(--muted)">(取消)</span>':''}</div>
+          <div class="rmeta">${r[4]}包・${r[7]}・${r[12]} ${t}</div>
+          ${r[14]?`<div class="rmeta" style="color:#1565C0;">💬 ${r[14]}</div>`:''}
         </div>
         <div>
-          <div class="oamt">${isCancelled?'<s>':''}$${total.toLocaleString()}${isCancelled?'</s>':''}</div>
-          ${isCancelled
-            ?'<span class="pill pill-cancelled">已取消</span>'
-            :`<span class="pill ${r[10]==='已付'?'pill-paid':'pill-unpaid'}">${r[10]}</span>
-              <span class="pill ${r[11]==='已出貨'?'pill-shipped':'pill-unshipped'}">${r[11]}</span>`}
+          <div class="ramt">${isCancelled?'<s>':''}\$${total.toLocaleString()}${isCancelled?'</s>':''}</div>
+          ${isCancelled?'<span class="pill pill-cancelled">已取消</span>':`
+            <span class="pill ${r[10]==='已付'?'pill-paid':'pill-unpaid'}">${r[10]}</span>
+            <span class="pill ${r[11]==='已出貨'?'pill-shipped':'pill-unshipped'}">${r[11]}</span>`}
         </div>
       </div>`;
     }).join('')
-    :'<div class="empty">此期間無訂單</div>';
+    :'<div class="loading">此期間無資料</div>';
 }
 
-function renderExpenses(){
-  const totalExp=allExpenses.reduce((a,r)=>a+(parseFloat(r[2])||0),0);
-  document.getElementById('expLabel').textContent='合計 $'+totalExp.toLocaleString();
-  document.getElementById('expList').innerHTML=allExpenses.length
-    ?[...allExpenses].reverse().slice(0,20).map(r=>`
-      <div class="exp-row">
-        <div><div class="exp-cat">${r[1]}</div><div class="exp-note">${r[3]||''}${r[4]?' · '+r[4]:''}</div></div>
-        <div class="exp-amt">-$${(parseFloat(r[2])||0).toLocaleString()}</div>
-      </div>`).join('')
-    :'<div class="empty">尚無雜支記錄</div>';
+function parseCustomerText(){
+  const text=document.getElementById('parseInput').value.trim();
+  if(!text){showToast('請先貼上文字',true);return;}
+
+  // 電話
+  const phoneMatch=text.match(/09\d{2}[-\s]?\d{3}[-\s]?\d{3,4}/);
+  const phone=phoneMatch?phoneMatch[0].replace(/[\s-]/g,'').replace(/(\d{4})(\d{3})(\d{3})/,'$1-$2-$3'):'';
+
+  // 包數
+  const qtyMatch=text.match(/(\d+)\s*包/);
+  const qty=qtyMatch?parseInt(qtyMatch[1]):null;
+
+  // 地址（含地址關鍵字的行，合併）
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const addrKw=/[市縣區鄉鎮路街巷弄號樓]/;
+  const addrLines=lines.filter(l=>addrKw.test(l));
+  const address=addrLines.join('');
+
+  // 姓名（2-4個中文字，排除地址行和電話行）
+  const nonAddrLines=lines.filter(l=>!addrKw.test(l)&&!l.match(/09\d/));
+  let name='';
+  for(const line of nonAddrLines){
+    const cleaned=line.replace(/[\d\-：:\s,，。、]/g,' ');
+    const words=cleaned.split(/\s+/).filter(w=>/^[\u4e00-\u9fa5]{2,4}$/.test(w));
+    if(words.length){name=words[0];break;}
+  }
+
+  if(name)document.getElementById('customer').value=name;
+  if(phone)document.getElementById('phone').value=phone;
+  if(address)document.getElementById('custNote').value=address;
+  if(qty){document.getElementById('quantity').value=qty;calcTotal();}
+
+  document.getElementById('parseInput').value='';
+  showToast('✓ 解析完成，請確認欄位');
 }
 
-loadAll();
-setInterval(loadAll,60000);
+async function markPaid(rowIndex,btn){
+  btn.disabled=true;btn.textContent='更新中...';
+  try{
+    await apiFetch({action:'markPaid',rowIndex});
+    showToast('✓ 已標記付款');
+    // 更新本地資料
+    allOrders[rowIndex][10]='已付';
+    renderRecords();
+  }catch(e){btn.disabled=false;btn.textContent='標記已付';showToast('失敗，請重試',true);}
+}
+
+function showToast(msg,isErr=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(isErr?' err':'')+' show';
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+loadCustomers();calcTotal();setDefaultDate();
 </script>
 </body>
 </html>
