@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>調理包看板</title>
+<style>
+:root{
+  --br:#3D2B1F;--bm:#6B4226;--bl:#A0673A;
+  --cream:#FDF6EE;--gold:#C8860A;
+  --green:#2E7D32;--red:#C62828;--orange:#E65100;
+  --border:#E8DDD4;--bg:#F5EDE3;--muted:#7A6A5A;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}
+header{background:var(--br);color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:flex-end;}
+header h1{font-size:20px;font-weight:700;}
+.tagline{font-size:11px;opacity:.5;margin-top:3px;}
+.refresh-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;}
+.updated{font-size:11px;opacity:.45;margin-top:5px;text-align:right;}
+.container{max-width:520px;margin:0 auto;padding:16px;}
+.sec{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:18px 0 10px;}
+
+/* 未出貨提醒 */
+.alert-box{background:#FFF3E0;border:1px solid #FFB74D;border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.alert-header{background:#FF6F00;color:#fff;padding:10px 16px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;}
+.alert-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 16px;border-bottom:1px solid #FFE0B2;}
+.alert-item:last-child{border-bottom:none;}
+.alert-name{font-size:13px;font-weight:600;color:#BF360C;}
+.alert-meta{font-size:11px;color:#E64A19;margin-top:2px;}
+.alert-custnote{font-size:11px;color:#1565C0;background:#E3F2FD;border-radius:5px;padding:4px 8px;margin-top:4px;}
+.alert-qty{font-size:20px;font-weight:700;color:#BF360C;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.alert-qty small{font-size:11px;font-weight:400;}
+
+/* 庫存 */
+.inventory-hero{background:var(--br);color:#fff;border-radius:14px;padding:18px;margin-bottom:12px;}
+.inv-lbl{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.7px;}
+.inv-val{font-size:40px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;line-height:1;}
+.inv-sub{font-size:12px;opacity:.55;margin-top:6px;}
+.inv-note{font-size:12px;opacity:.75;margin-top:8px;background:rgba(255,255,255,.1);border-radius:7px;padding:7px 10px;}
+.inv-mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;}
+.inv-mini{background:rgba(255,255,255,.12);border-radius:9px;padding:10px;text-align:center;}
+.inv-mini .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
+.inv-mini .l{font-size:10px;opacity:.6;margin-top:2px;}
+.progress-wrap{margin-top:14px;}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;opacity:.6;margin-bottom:6px;}
+.progress-track{background:rgba(255,255,255,.15);border-radius:6px;height:8px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:6px;background:#fff;transition:width .6s ease;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.kpi{background:#fff;border-radius:12px;padding:14px;border:1px solid var(--border);}
+.kpi.full{grid-column:span 2;display:flex;justify-content:space-between;align-items:center;}
+.kpi-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+.kpi-val{font-size:28px;font-weight:700;color:var(--br);margin-top:4px;font-variant-numeric:tabular-nums;line-height:1;}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:4px;}
+.kpi-val.gold{color:var(--gold);}
+.kpi-val.red{color:var(--red);}
+.kpi-val.green{color:var(--green);}
+
+/* 期間選擇 */
+.period-row{display:flex;gap:6px;margin-bottom:14px;}
+.period-btn{flex:1;padding:8px;border:1px solid var(--border);border-radius:9px;background:#fff;font-size:12px;color:var(--muted);cursor:pointer;text-align:center;transition:all .15s;}
+.period-btn.active{background:var(--br);border-color:var(--br);color:#fff;font-weight:600;}
+
+/* 毛利 */
+.profit-box{background:var(--br);color:#fff;border-radius:14px;padding:18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+.p-lbl{font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.6px;}
+.p-val{font-size:30px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;}
+.p-detail{font-size:11px;opacity:.5;margin-top:4px;}
+
+/* 卡片 */
+.card{background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px;}
+.card-header{padding:11px 16px;background:var(--cream);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--bm);}
+.card-header span{font-weight:400;color:var(--muted);font-size:12px;}
+
+.order-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 16px;border-bottom:1px solid #F5F0EB;}
+.order-row:last-child{border-bottom:none;}
+.order-row.cancelled{opacity:.4;}
+.oname{font-size:13px;font-weight:600;color:var(--br);}
+.ometa{font-size:11px;color:var(--muted);margin-top:2px;}
+.ocustnote{font-size:11px;color:#1565C0;margin-top:3px;}
+.oamt{font-size:14px;font-weight:700;color:var(--br);font-variant-numeric:tabular-nums;text-align:right;}
+.pill{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;margin-top:3px;}
+.pill-paid{background:#E8F5E9;color:var(--green);}
+.pill-unpaid{background:#FFEBEE;color:var(--red);}
+.pill-shipped{background:#E3F2FD;color:#1565C0;}
+.pill-unshipped{background:#FFF3E0;color:var(--orange);}
+.pill-cancelled{background:#EEE;color:#757575;}
+
+.exp-row{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #F5F0EB;}
+.exp-row:last-child{border-bottom:none;}
+.exp-cat{font-size:13px;color:var(--br);}
+.exp-note{font-size:11px;color:var(--muted);margin-top:2px;}
+.exp-amt{font-size:14px;font-weight:600;color:var(--red);font-variant-numeric:tabular-nums;}
+
+.bar-wrap{padding:12px 16px 4px;}
+.bar-item{margin-bottom:11px;}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px;}
+.bar-track{background:#F0E8E0;border-radius:6px;height:7px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;transition:width .6s ease;}
+
+.loading{text-align:center;padding:30px;color:var(--muted);font-size:13px;}
+.empty{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+footer{text-align:center;padding:20px;font-size:11px;color:#C0B0A0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🧊 調理包看板</h1>
+    <div class="tagline">即時統計・公開查看</div>
+  </div>
+  <div>
+    <button class="refresh-btn" onclick="loadAll()">重新整理</button>
+    <div class="updated" id="updatedTime">--</div>
+  </div>
+</header>
+
+<div class="container">
+  <div id="alertArea"></div>
+
+  <div class="sec">庫存狀況</div>
+  <div class="inventory-hero">
+    <div class="inv-lbl">當前批次剩餘</div>
+    <div class="inv-val" id="invRemain">-</div>
+    <div class="inv-sub" id="invSub">載入中...</div>
+    <div class="inv-note" id="invNote" style="display:none"></div>
+    <div class="inv-mini-grid">
+      <div class="inv-mini"><div class="v" id="invTotal">-</div><div class="l">本批生產</div></div>
+      <div class="inv-mini"><div class="v" id="invSold">-</div><div class="l">已售出</div></div>
+      <div class="inv-mini"><div class="v" id="invPct">-</div><div class="l">售出率</div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>售出進度</span><span id="invPctLabel">0%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="invBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="sec">營業統計</div>
+  <div class="period-row">
+    <button class="period-btn active" onclick="setPeriod('week',this)">本週</button>
+    <button class="period-btn" onclick="setPeriod('month',this)">本月</button>
+    <button class="period-btn" onclick="setPeriod('batch',this)">本批</button>
+    <button class="period-btn" onclick="setPeriod('all',this)">全部</button>
+  </div>
+  <div class="kpi-grid" id="kpiGrid"><div class="loading" style="grid-column:span 2">載入中...</div></div>
+  <div id="profitBox"></div>
+
+  <div class="sec">配送方式</div>
+  <div class="card">
+    <div class="bar-wrap" id="deliveryChart"><div class="loading">載入中...</div></div>
+  </div>
+
+  <div class="sec">訂單明細</div>
+  <div class="card">
+    <div class="card-header">訂單列表 <span id="orderLabel"></span></div>
+    <div id="orderList"><div class="loading">載入中...</div></div>
+  </div>
+
+  <div class="sec">雜支記錄</div>
+  <div class="card">
+    <div class="card-header">支出明細 <span id="expLabel"></span></div>
+    <div id="expList"><div class="loading">載入中...</div></div>
+  </div>
+
+  <footer>每60秒自動更新</footer>
+</div>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbxn-6LW1odeSgsbgS6NbbMAfDUNu2K61-th73EfWXV-GaSjdmuzhtmNfmo6_bgcILmk/exec';
+let allOrders=[],allExpenses=[],allBatches=[],curPeriod='week';
+
+// 新欄位順序:
+// 0:銷售日期 1:記帳時間 2:客戶名稱 3:電話 4:包數 5:金額 6:運費
+// 7:配送方式 8:箱型 9:付款方式 10:付款狀態 11:出貨狀態 12:經手人
+// 13:內部備註 14:客戶備註 15:訂單狀態
+
+function parseDate(str){
+  if(!str)return null;
+  try{
+    const s=String(str).trim();
+    if(s.includes('T')&&(s.includes('Z')||s.includes('+'))){
+      const d=new Date(s);
+      return new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    }
+    const m=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})\s*(上午|下午|AM|PM)?\s*(\d{1,2}):(\d{2})/);
+    if(m){
+      let h=parseInt(m[5]);
+      if((m[4]==='下午'||m[4]==='PM')&&h<12)h+=12;
+      if((m[4]==='上午'||m[4]==='AM')&&h===12)h=0;
+      return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]),h,parseInt(m[6]));
+    }
+    const d=s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if(d)return new Date(parseInt(d[1]),parseInt(d[2])-1,parseInt(d[3]));
+    return null;
+  }catch(e){return null;}
+}
+
+async function apiFetch(params, retry=1){
+  for(let i=0;i<=retry;i++){
+    try{
+      const url=API+'?'+new URLSearchParams(params);
+      const res=await fetch(url);
+      const text=await res.text();
+      return JSON.parse(text);
+    }catch(e){
+      if(i===retry)throw e;
+      await new Promise(r=>setTimeout(r,1000));
+    }
+  }
+}
+
+
+async function loadAll(){
+  document.getElementById('updatedTime').textContent='載入中...';
+  try{
+    const d=await apiFetch({action:'dashboard'});
+    allOrders=d.orders||[];
+    allExpenses=d.expenses||[];
+    allBatches=d.batches||[];
+    renderInventory();
+    renderAlert();
+    renderStats();
+    renderOrders();
+    renderExpenses();
+    document.getElementById('updatedTime').textContent='更新：'+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){document.getElementById('updatedTime').textContent='載入失敗';}
+}
+
+function renderInventory(){
+  if(!allBatches.length){
+    document.getElementById('invRemain').textContent='尚無批次';
+    document.getElementById('invSub').textContent='請先登記第一批';
+    return;
+  }
+  const last=allBatches[allBatches.length-1];
+  const bDate=parseDate(last[0]);
+  const bQty=parseInt(last[1])||0;
+  const bNote=last[2]||'';
+  const sold=allOrders.filter(r=>r[0]&&r[15]!=='已取消'&&parseDate(r[0])>=bDate).reduce((a,r)=>a+(parseInt(r[4])||0),0);
+  const remain=bQty-sold;
+  const pct=bQty?Math.round(sold/bQty*100):0;
+  document.getElementById('invRemain').textContent=remain+'包';
+  document.getElementById('invSub').textContent=`批次：${bDate?bDate.toLocaleDateString('zh-TW'):''}${remain<=10?' ⚠️ 快賣完了！':''}`;
+  const noteEl=document.getElementById('invNote');
+  if(bNote){noteEl.textContent='📝 '+bNote;noteEl.style.display='block';}
+  else{noteEl.style.display='none';}
+  document.getElementById('invTotal').textContent=bQty;
+  document.getElementById('invSold').textContent=sold;
+  document.getElementById('invPct').textContent=pct+'%';
+  document.getElementById('invPctLabel').textContent=pct+'%';
+  document.getElementById('invBar').style.width=pct+'%';
+}
+
+function renderAlert(){
+  const pending=allOrders.filter(r=>r[11]==='未出貨'&&r[10]==='已付'&&r[15]!=='已取消');
+  if(!pending.length){document.getElementById('alertArea').innerHTML='';return;}
+  document.getElementById('alertArea').innerHTML=`
+    <div class="alert-box">
+      <div class="alert-header">⚠️ 待出貨（已付款） <span>${pending.length} 筆</span></div>
+      ${pending.map(r=>{
+        const custnote=r[14]||'';
+        return `<div class="alert-item">
+          <div>
+            <div class="alert-name">${r[2]}</div>
+            <div class="alert-meta">${r[7]}・${r[0]}・${r[12]}</div>
+            ${custnote?`<div class="alert-custnote">💬 ${custnote}</div>`:''}
+          </div>
+          <div class="alert-qty">${r[4]}<small> 包</small></div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function setPeriod(p,btn){
+  curPeriod=p;
+  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderStats();renderOrders();
+}
+
+function getFiltered(){
+  const now=new Date();
+  const weekStart=new Date(now);weekStart.setDate(now.getDate()-now.getDay()+1);weekStart.setHours(0,0,0,0);
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const batchStart=allBatches.length?parseDate(allBatches[allBatches.length-1][0]):new Date(0);
+  return allOrders.filter(r=>{
+    if(!r[0])return false;
+    const d=parseDate(r[0]);
+    if(!d)return curPeriod==='all';
+    if(curPeriod==='week')return d>=weekStart;
+    if(curPeriod==='month')return d>=monthStart;
+    if(curPeriod==='batch')return d>=batchStart;
+    return true;
+  });
+}
+
+function renderStats(){
+  const f=getFiltered();
+  const active=f.filter(r=>r[15]!=='已取消');
+  const qty=active.reduce((a,r)=>a+(parseInt(r[4])||0),0);
+  const sales=active.reduce((a,r)=>a+(parseInt(r[5])||0),0);
+  const ship=active.reduce((a,r)=>a+(parseInt(r[6])||0),0);
+  const unpaid=active.filter(r=>r[10]==='未付').length;
+  const unpaidAmt=active.filter(r=>r[10]==='未付').reduce((a,r)=>a+(parseInt(r[5])||0)+(parseInt(r[6])||0),0);
+  const unshipped=active.filter(r=>r[11]==='未出貨').length;
+  const cancelled=f.filter(r=>r[15]==='已取消').length;
+  const totalExp=allExpenses.reduce((a,r)=>a+(parseFloat(r[2])||0),0);
+  const profit=sales-totalExp;
+
+  document.getElementById('kpiGrid').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">總包數</div><div class="kpi-val">${qty}</div></div>
+    <div class="kpi"><div class="kpi-lbl">訂單筆數</div><div class="kpi-val">${active.length}</div></div>
+    <div class="kpi"><div class="kpi-lbl">銷售金額</div><div class="kpi-val gold">$${sales.toLocaleString()}</div><div class="kpi-sub">不含運費</div></div>
+    <div class="kpi"><div class="kpi-lbl">運費收入</div><div class="kpi-val">$${ship.toLocaleString()}</div></div>
+    <div class="kpi full">
+      <div><div class="kpi-lbl">未付款</div><div class="kpi-val red">${unpaid} 筆</div></div>
+      <div style="text-align:right"><div class="kpi-lbl">未付金額</div><div class="kpi-val red">$${unpaidAmt.toLocaleString()}</div></div>
+    </div>
+    <div class="kpi"><div class="kpi-lbl">未出貨</div><div class="kpi-val" style="color:var(--orange)">${unshipped} 筆</div></div>
+    <div class="kpi"><div class="kpi-lbl">取消筆數</div><div class="kpi-val" style="color:var(--muted)">${cancelled}</div></div>`;
+
+  const expCats={};
+  allExpenses.forEach(r=>{expCats[r[1]]=(expCats[r[1]]||0)+(parseFloat(r[2])||0);});
+  document.getElementById('profitBox').innerHTML=`
+    <div class="profit-box">
+      <div>
+        <div class="p-lbl">毛利（銷售 − 雜支）</div>
+        <div class="p-val">${profit>=0?'':'−'}$${Math.abs(profit).toLocaleString()}</div>
+        <div class="p-detail">雜支合計 $${totalExp.toLocaleString()}</div>
+      </div>
+      <div style="text-align:right">
+        ${Object.entries(expCats).map(([k,v])=>`<div style="font-size:11px;opacity:.65;margin-top:3px;">${k} $${v.toLocaleString()}</div>`).join('')||'<div style="font-size:11px;opacity:.4">尚無雜支</div>'}
+      </div>
+    </div>`;
+
+  const del={};
+  getFiltered().filter(r=>r[15]!=='已取消').forEach(r=>{del[r[7]]=(del[r[7]]||0)+1;});
+  const maxDel=Math.max(...Object.values(del),1);
+  const colors={'賣貨便':'#A0673A','宅配':'#6B4226','面交':'#C8860A'};
+  document.getElementById('deliveryChart').innerHTML=Object.keys(del).length
+    ?Object.entries(del).map(([k,v])=>`
+      <div class="bar-item">
+        <div class="bar-label"><span>${k}</span><span>${v} 筆</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxDel*100)}%;background:${colors[k]||'#888'}"></div></div>
+      </div>`).join('')
+    :'<div class="empty">此期間無資料</div>';
+}
+
+function renderOrders(){
+  const f=getFiltered();
+  document.getElementById('orderLabel').textContent=f.length+' 筆';
+  document.getElementById('orderList').innerHTML=f.length
+    ?[...f].reverse().map(r=>{
+      const isCancelled=r[15]==='已取消';
+      const total=(parseInt(r[5])||0)+(parseInt(r[6])||0);
+      const custnote=r[14]||'';
+      return `<div class="order-row${isCancelled?' cancelled':''}">
+        <div>
+          <div class="oname">${r[2]}</div>
+          <div class="ometa">${r[4]}包・${r[7]}・${r[12]} ${r[0]||''}</div>
+          ${custnote?`<div class="ocustnote">💬 ${custnote}</div>`:''}
+        </div>
+        <div>
+          <div class="oamt">${isCancelled?'<s>':''}$${total.toLocaleString()}${isCancelled?'</s>':''}</div>
+          ${isCancelled
+            ?'<span class="pill pill-cancelled">已取消</span>'
+            :`<span class="pill ${r[10]==='已付'?'pill-paid':'pill-unpaid'}">${r[10]}</span>
+              <span class="pill ${r[11]==='已出貨'?'pill-shipped':'pill-unshipped'}">${r[11]}</span>`}
+        </div>
+      </div>`;
+    }).join('')
+    :'<div class="empty">此期間無訂單</div>';
+}
+
+function renderExpenses(){
+  const totalExp=allExpenses.reduce((a,r)=>a+(parseFloat(r[2])||0),0);
+  document.getElementById('expLabel').textContent='合計 $'+totalExp.toLocaleString();
+  document.getElementById('expList').innerHTML=allExpenses.length
+    ?[...allExpenses].reverse().slice(0,20).map(r=>`
+      <div class="exp-row">
+        <div><div class="exp-cat">${r[1]}</div><div class="exp-note">${r[3]||''}${r[4]?' · '+r[4]:''}</div></div>
+        <div class="exp-amt">-$${(parseFloat(r[2])||0).toLocaleString()}</div>
+      </div>`).join('')
+    :'<div class="empty">尚無雜支記錄</div>';
+}
+
+loadAll();
+setInterval(loadAll,60000);
+</script>
+</body>
+</html>
